@@ -3,6 +3,7 @@ module Ch2.UnbalancedSetTests exposing (all)
 import Test exposing (..)
 import Expect
 import Fuzz exposing (list, int, intRange)
+import Misc
 import Set
 import Ch2.UnbalancedSet as USet
 
@@ -23,7 +24,7 @@ all =
                     |> Expect.equal 1
         , fuzz (list int) "inserting many items, those items can be looked up" <|
             \xs ->
-                maybeChain
+                Misc.maybeChain
                     (\x tree ->
                         USet.lookupWith compare x tree
                             |> Maybe.andThen (always (Just tree))
@@ -53,7 +54,7 @@ all =
                     |> Expect.equal ((2 ^ n) - 1)
         , fuzz (intRange 0 16) "a complete tree's branches are identical on every level" <|
             \n ->
-                maybeChain
+                Misc.maybeChain
                     (\_ tree ->
                         case tree of
                             USet.Empty ->
@@ -85,7 +86,7 @@ all =
                         (List.foldl USet.insert USet.empty xs)
         , fuzz (list int) "member is a convenient lookupWith" <|
             \xs ->
-                maybeChain
+                Misc.maybeChain
                     (\x tree ->
                         if USet.member x tree then
                             Just tree
@@ -96,11 +97,6 @@ all =
                     xs
                     |> Expect.notEqual Nothing
         ]
-
-
-maybeChain : (a -> b -> Maybe b) -> Maybe b -> List a -> Maybe b
-maybeChain f =
-    List.foldl (Maybe.andThen << f)
 
 
 checkBalance : USet.UnbalancedSet a -> Bool

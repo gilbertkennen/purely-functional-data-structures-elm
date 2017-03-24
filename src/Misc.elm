@@ -2,6 +2,7 @@ module Misc
     exposing
         ( scanlWith
         , isOdd
+        , maybeChain
         )
 
 
@@ -24,3 +25,8 @@ scanlWith f init xs =
         xs
         |> Tuple.second
         |> List.reverse
+
+
+maybeChain : (a -> b -> Maybe b) -> Maybe b -> List a -> Maybe b
+maybeChain f =
+    List.foldl (Maybe.andThen << f)
