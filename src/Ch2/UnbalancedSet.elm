@@ -1,7 +1,9 @@
-module Ch2.UnbalancedTree
+module Ch2.UnbalancedSet
     exposing
-        ( UnbalancedTree(Empty, Node)
+        ( UnbalancedSet(Empty, Node)
         , empty
+        , insert
+        , member
         , insertWith
         , lookupWith
         , complete
@@ -13,22 +15,37 @@ module Ch2.UnbalancedTree
 import Misc exposing (isOdd)
 
 
-type UnbalancedTree a
+type UnbalancedSet a
     = Empty
-    | Node (UnbalancedTree a) a (UnbalancedTree a)
+    | Node (UnbalancedSet a) a (UnbalancedSet a)
 
 
-empty : UnbalancedTree a
+insert : comparable -> UnbalancedSet comparable -> UnbalancedSet comparable
+insert x xs =
+    insertWith compare x xs
+
+
+member : comparable -> UnbalancedSet comparable -> Bool
+member x xs =
+    case lookupWith compare x xs of
+        Nothing ->
+            False
+
+        Just _ ->
+            True
+
+
+empty : UnbalancedSet a
 empty =
     Empty
 
 
-insertWith : (a -> a -> Order) -> a -> UnbalancedTree a -> UnbalancedTree a
+insertWith : (a -> a -> Order) -> a -> UnbalancedSet a -> UnbalancedSet a
 insertWith cmp x xs =
     Maybe.withDefault xs (insertWithHelper cmp x xs)
 
 
-insertWithHelper : (a -> a -> Order) -> a -> UnbalancedTree a -> Maybe (UnbalancedTree a)
+insertWithHelper : (a -> a -> Order) -> a -> UnbalancedSet a -> Maybe (UnbalancedSet a)
 insertWithHelper cmp x xs =
     case xs of
         Empty ->
@@ -46,7 +63,7 @@ insertWithHelper cmp x xs =
                     Just (Node left x right)
 
 
-lookupWith : (a -> b -> Order) -> a -> UnbalancedTree b -> Maybe b
+lookupWith : (a -> b -> Order) -> a -> UnbalancedSet b -> Maybe b
 lookupWith cmp x xs =
     case xs of
         Empty ->
@@ -64,7 +81,7 @@ lookupWith cmp x xs =
                     Just y
 
 
-complete : Int -> a -> UnbalancedTree a
+complete : Int -> a -> UnbalancedSet a
 complete d x =
     if d <= 0 then
         Empty
@@ -76,7 +93,7 @@ complete d x =
             Node leaf x leaf
 
 
-create : Int -> a -> UnbalancedTree a
+create : Int -> a -> UnbalancedSet a
 create n x =
     if n == 0 then
         Empty
@@ -94,7 +111,7 @@ create n x =
             Node left x right
 
 
-createHelper : Int -> a -> ( UnbalancedTree a, UnbalancedTree a )
+createHelper : Int -> a -> ( UnbalancedSet a, UnbalancedSet a )
 createHelper m x =
     if m == 0 then
         ( Empty, Node Empty x Empty )
@@ -112,7 +129,7 @@ createHelper m x =
             ( Node left x right, Node right x right )
 
 
-size : UnbalancedTree a -> Int
+size : UnbalancedSet a -> Int
 size tree =
     case tree of
         Empty ->
@@ -122,6 +139,6 @@ size tree =
             1 + size left + size right
 
 
-fromList : (a -> a -> Order) -> List a -> UnbalancedTree a
+fromList : (a -> a -> Order) -> List a -> UnbalancedSet a
 fromList f =
     List.foldl (insertWith f) empty
