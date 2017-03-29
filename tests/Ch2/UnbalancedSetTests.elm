@@ -66,18 +66,23 @@ all =
                                 else
                                     Nothing
                     )
-                    (Just (USet.complete n Nothing))
+                    (Just (USet.complete n ()))
                     (List.range 1 n)
                     |> Expect.notEqual Nothing
         , test "a balanced tree of size 0 is Empty" <|
             \() ->
-                USet.create 0 Nothing
+                USet.create 0 ()
                     |> Expect.equal USet.Empty
+        , fuzz (intRange 0 (2 ^ 8)) "creating a balanced tree creates a tree with the correct number of nodes" <|
+            \n ->
+                USet.create n ()
+                    |> USet.size
+                    |> Expect.equal n
         , fuzz (intRange 0 (2 ^ 8))
             "every node in a balanced tree has children whose sizes vary by as much as 1"
           <|
             \n ->
-                checkBalance (USet.create n Nothing)
+                checkBalance (USet.create n ())
                     |> Expect.true "imbalance found"
         , fuzz (list int) "insert is a convenient insertWith" <|
             \xs ->
